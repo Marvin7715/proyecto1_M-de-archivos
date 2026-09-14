@@ -20,13 +20,22 @@ def obtener_configuracion_default():
 
 def guardar_configuracion(configuracion):
     try:
-        with open(ARCHIVO_CONFIG, "w", encoding="utf-8") as archivo:
+        if os.path.exists(ARCHIVO_CONFIG):
+            with open(ARCHIVO_CONFIG, "r", encoding="utf-8") as archivo:
+                contenido_anterior = archivo.read()
+
+            with open(ARCHIVO_BACKUP, "w", encoding="utf-8") as archivo:
+                archivo.write(contenido_anterior)
+
+        with open(ARCHIVO_TEMPORAL, "w", encoding="utf-8") as archivo:
             json.dump(
                 configuracion,
                 archivo,
                 indent=4,
                 ensure_ascii=False
             )
+
+        os.replace(ARCHIVO_TEMPORAL, ARCHIVO_CONFIG)
 
         return True
 
@@ -35,7 +44,7 @@ def guardar_configuracion(configuracion):
         return False
 
     except OSError:
-        print("Error: ocurrió un problema al guardar el archivo.")
+        print("Error: ocurrió un problema al guardar los archivos.")
         return False
 
 def cargar_configuracion():
