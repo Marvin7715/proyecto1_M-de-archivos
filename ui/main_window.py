@@ -6,6 +6,8 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QMessageBox
 )
+from .settings_window import SettingsWindow
+from config_manager import cargar_configuracion, guardar_configuracion
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
@@ -14,6 +16,8 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        self.configuracion = cargar_configuracion()
 
         self.setWindowTitle("Manejo de Archivos - Configuración de Usuario")
         self.resize(900, 600)
@@ -95,8 +99,23 @@ class MainWindow(QMainWindow):
         )
 
     def abrir_settings(self):
-        QMessageBox.information(
-            self,
-            "Settings",
-            "Aquí construiremos la ventana de configuración."
+        ventana_settings = SettingsWindow(
+            self.configuracion,
+            self
         )
+
+        if ventana_settings.exec():
+            self.configuracion = ventana_settings.configuracion
+
+            if guardar_configuracion(self.configuracion):
+                QMessageBox.information(
+                    self,
+                    "Configuración",
+                    "La configuración se guardó correctamente."
+                )
+            else:
+                QMessageBox.critical(
+                    self,
+                    "Error",
+                    "No fue posible guardar la configuración."
+                )
