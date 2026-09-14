@@ -1,17 +1,18 @@
 import sys
 
-from PyQt6.QtWidgets import QApplication, QLabel, QWidget
+from PyQt6.QtWidgets import QApplication
+
+from ui.main_window import MainWindow
 
 
-app = QApplication(sys.argv)
+def main():
+    aplicacion = QApplication(sys.argv)
 
-ventana = QWidget()
-ventana.setWindowTitle("Proyecto Manejo de Archivos")
-ventana.resize(500, 300)
+    ventana = MainWindow()
+    ventana.show()
 
-texto = QLabel("PyQt6 funciona correctamente", parent=ventana)
-texto.move(150, 130)
+    sys.exit(aplicacion.exec())
 
-ventana.show()
 
-sys.exit(app.exec())
+if __name__ == "__main__":
+    main()
