@@ -6,11 +6,11 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QMessageBox
 )
-from .settings_window import SettingsWindow
-from config_manager import cargar_configuracion, guardar_configuracion
 from PyQt6.QtGui import QAction
 from PyQt6.QtCore import Qt
 
+from config_manager import cargar_configuracion, guardar_configuracion
+from .settings_window import SettingsWindow
 
 class MainWindow(QMainWindow):
 
@@ -24,20 +24,21 @@ class MainWindow(QMainWindow):
 
         self.crear_interfaz()
         self.crear_menu()
+        self.aplicar_configuracion()
 
     def crear_interfaz(self):
         widget_central = QWidget()
         layout = QVBoxLayout()
 
-        titulo = QLabel("Manejo de Archivos")
-        titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.titulo = QLabel("Manejo de Archivos")
+        self.titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        subtitulo = QLabel("Configuración de Usuario")
-        subtitulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.subtitulo = QLabel("Configuración de Usuario")
+        self.subtitulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         layout.addStretch()
-        layout.addWidget(titulo)
-        layout.addWidget(subtitulo)
+        layout.addWidget(self.titulo)
+        layout.addWidget(self.subtitulo)
         layout.addStretch()
 
         widget_central.setLayout(layout)
@@ -91,6 +92,51 @@ class MainWindow(QMainWindow):
 
         self.setMenuBar(barra_menu)
 
+    def aplicar_configuracion(self):
+        tema = self.configuracion["tema_interfaz"]
+        tamaño_fuente = self.configuracion["tamaño_fuente"]
+        color_menu = self.configuracion["color_barra_menu"]
+        color_letra = self.configuracion["color_letra"]
+
+        if tema == "oscuro":
+            color_fondo = "#202124"
+        else:
+            color_fondo = "#FFFFFF"
+
+        self.setStyleSheet(
+            f"""
+            QMainWindow {{
+                background-color: {color_fondo};
+            }}
+
+            QLabel {{
+                color: {color_letra};
+                font-size: {tamaño_fuente}px;
+            }}
+
+            QMenuBar {{
+                background-color: {color_menu};
+                color: {color_letra};
+                font-size: {tamaño_fuente}px;
+            }}
+
+            QMenuBar::item {{
+                background-color: transparent;
+                padding: 5px 10px;
+            }}
+
+            QMenu {{
+                background-color: {color_fondo};
+                color: {color_letra};
+                font-size: {tamaño_fuente}px;
+            }}
+
+            QPushButton {{
+                font-size: {tamaño_fuente}px;
+            }}
+            """
+        )
+
     def opcion_no_disponible(self):
         QMessageBox.information(
             self,
@@ -108,6 +154,8 @@ class MainWindow(QMainWindow):
             self.configuracion = ventana_settings.configuracion
 
             if guardar_configuracion(self.configuracion):
+                self.aplicar_configuracion()
+
                 QMessageBox.information(
                     self,
                     "Configuración",
