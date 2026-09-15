@@ -1,3 +1,5 @@
+import os
+
 from PyQt6.QtWidgets import (
     QMainWindow,
     QWidget,
@@ -6,7 +8,7 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QMessageBox
 )
-from PyQt6.QtGui import QAction
+from PyQt6.QtGui import QAction, QPixmap
 from PyQt6.QtCore import Qt
 
 from config_manager import cargar_configuracion, guardar_configuracion
@@ -25,6 +27,7 @@ class MainWindow(QMainWindow):
         self.crear_interfaz()
         self.crear_menu()
         self.aplicar_configuracion()
+        self.aplicar_foto_perfil()
 
     def crear_interfaz(self):
         widget_central = QWidget()
@@ -36,9 +39,13 @@ class MainWindow(QMainWindow):
         self.subtitulo = QLabel("Configuración de Usuario")
         self.subtitulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        self.foto_perfil = QLabel()
+        self.foto_perfil.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         layout.addStretch()
         layout.addWidget(self.titulo)
         layout.addWidget(self.subtitulo)
+        layout.addWidget(self.foto_perfil)
         layout.addStretch()
 
         widget_central.setLayout(layout)
@@ -155,6 +162,7 @@ class MainWindow(QMainWindow):
 
             if guardar_configuracion(self.configuracion):
                 self.aplicar_configuracion()
+                self.aplicar_foto_perfil()
 
                 QMessageBox.information(
                     self,
@@ -167,3 +175,22 @@ class MainWindow(QMainWindow):
                     "Error",
                     "No fue posible guardar la configuración."
                 )
+
+    def aplicar_foto_perfil(self):
+        ruta_foto = self.configuracion["foto_perfil"]
+
+        if ruta_foto and os.path.exists(ruta_foto):
+            imagen = QPixmap(ruta_foto)
+
+            if not imagen.isNull():
+                imagen = imagen.scaled(
+                    150,
+                    150,
+                    Qt.AspectRatioMode.KeepAspectRatio,
+                    Qt.TransformationMode.SmoothTransformation
+                )
+
+                self.foto_perfil.setPixmap(imagen)
+                return
+
+        self.foto_perfil.setText("Sin foto de perfil")
