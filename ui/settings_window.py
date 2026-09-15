@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -120,7 +123,22 @@ class SettingsWindow(QDialog):
         )
 
         if ruta:
-            self.ruta_foto = ruta
+            carpeta_imagenes = "images"
+
+            if not os.path.exists(carpeta_imagenes):
+                os.makedirs(carpeta_imagenes)
+
+            extension = os.path.splitext(ruta)[1]
+            nombre_foto = "perfil" + extension
+
+            ruta_destino = os.path.join(
+                carpeta_imagenes,
+                nombre_foto
+            )
+
+            shutil.copy2(ruta, ruta_destino)
+
+            self.ruta_foto = ruta_destino
             self.actualizar_etiqueta_foto()
 
     def actualizar_etiqueta_foto(self):
