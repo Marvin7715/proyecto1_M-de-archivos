@@ -52,10 +52,7 @@ def cargar_configuracion():
         print("El archivo de configuración no existe.")
         print("Se utilizarán los valores predeterminados.")
 
-        configuracion = obtener_configuracion_default()
-        guardar_configuracion(configuracion)
-
-        return configuracion
+        return obtener_configuracion_default()
 
     try:
         with open(ARCHIVO_CONFIG, "r", encoding="utf-8") as archivo:
@@ -63,28 +60,20 @@ def cargar_configuracion():
 
         if not validar_configuracion(configuracion):
             print("Error: el archivo de configuración tiene un formato inválido.")
-            print("Se utilizarán los valores predeterminados.")
-
-            return obtener_configuracion_default()
+            return recuperar_configuracion()
 
         return configuracion
 
     except json.JSONDecodeError:
         print("Error: el archivo de configuración está corrupto.")
-        print("Se utilizarán los valores predeterminados.")
-
-        return obtener_configuracion_default()
+        return recuperar_configuracion()
 
     except PermissionError:
         print("Error: no se tienen permisos para leer el archivo.")
-        print("Se utilizarán los valores predeterminados.")
-
         return obtener_configuracion_default()
 
     except OSError:
         print("Error: ocurrió un problema al leer el archivo.")
-        print("Se utilizarán los valores predeterminados.")
-
         return obtener_configuracion_default()
 
 
@@ -125,3 +114,32 @@ def validar_configuracion(configuracion):
         return False
 
     return True
+
+def recuperar_configuracion():
+    if not os.path.exists(ARCHIVO_BACKUP):
+        print("No existe un respaldo disponible.")
+        print("Se utilizarán los valores predeterminados.")
+
+        return obtener_configuracion_default()
+
+    try:
+        with open(ARCHIVO_BACKUP, "r", encoding="utf-8") as archivo:
+            configuracion = json.load(archivo)
+
+        if validar_configuracion(configuracion):
+            print("Se recuperó la configuración desde el respaldo.")
+            return configuracion
+
+        print("El respaldo también tiene un formato inválido.")
+
+    except json.JSONDecodeError:
+        print("El archivo de respaldo también está corrupto.")
+
+    except PermissionError:
+        print("No se tienen permisos para leer el respaldo.")
+
+    except OSError:
+        print("No fue posible leer el respaldo.")
+
+    print("Se utilizarán los valores predeterminados.")
+    return obtener_configuracion_default()
