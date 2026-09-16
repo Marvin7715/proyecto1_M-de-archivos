@@ -7,11 +7,11 @@ ARCHIVO_TEMPORAL = "config.tmp"
 
 CONFIGURACION_DEFAULT = {
     "nombre_usuario": "Usuario",
-    "tema_interfaz": "claro",
+    "tema_interfaz": "oscuro",
     "idioma": "es-ES",
     "tamaño_fuente": 12,
-    "color_barra_menu": "#E6B325",
-    "color_letra": "#000000",
+    "color_barra_menu": "#000000",
+    "color_letra": "#FFFFFF",
     "foto_perfil": ""
 }
 
