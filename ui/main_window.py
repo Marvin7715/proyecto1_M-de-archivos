@@ -4,15 +4,20 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
+    QHBoxLayout,
     QLabel,
-    QMenuBar,
-    QMessageBox
+    QMessageBox,
+    QPushButton,
+    QFrame,
+    QSizePolicy
 )
-from PyQt6.QtGui import QAction, QPixmap
+
+from PyQt6.QtGui import QPixmap, QPainter, QPainterPath, QFont
 from PyQt6.QtCore import Qt
 
 from config_manager import cargar_configuracion, guardar_configuracion
 from .settings_window import SettingsWindow
+
 
 class MainWindow(QMainWindow):
 
@@ -21,128 +26,672 @@ class MainWindow(QMainWindow):
 
         self.configuracion = cargar_configuracion()
 
-        self.setWindowTitle("Manejo de Archivos - Configuración de Usuario")
-        self.resize(900, 600)
+        self.setWindowTitle(
+            "Config User - Manejo de Archivos"
+        )
+
+        self.resize(1100, 700)
+        self.setMinimumSize(900, 600)
 
         self.crear_interfaz()
-        self.crear_menu()
         self.aplicar_configuracion()
-        self.aplicar_foto_perfil()
+        self.actualizar_datos_usuario()
 
     def crear_interfaz(self):
         widget_central = QWidget()
+        layout_principal = QHBoxLayout()
+
+        layout_principal.setContentsMargins(
+            0,
+            0,
+            0,
+            0
+        )
+
+        layout_principal.setSpacing(0)
+
+        self.barra_lateral = self.crear_barra_lateral()
+        self.panel_principal = self.crear_panel_principal()
+
+        layout_principal.addWidget(
+            self.barra_lateral
+        )
+
+        layout_principal.addWidget(
+            self.panel_principal
+        )
+
+        widget_central.setLayout(
+            layout_principal
+        )
+
+        self.setCentralWidget(
+            widget_central
+        )
+
+    def crear_barra_lateral(self):
+        barra = QFrame()
+
+        barra.setObjectName(
+            "barraLateral"
+        )
+
+        barra.setFixedWidth(
+            230
+        )
+
         layout = QVBoxLayout()
 
-        self.titulo = QLabel("Manejo de Archivos")
-        self.titulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setContentsMargins(
+            20,
+            25,
+            20,
+            20
+        )
 
-        self.subtitulo = QLabel("Configuración de Usuario")
-        self.subtitulo.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.setSpacing(
+            10
+        )
+
+        titulo = QLabel(
+            "CONFIG USER"
+        )
+
+        titulo.setObjectName(
+            "tituloLateral"
+        )
+
+        subtitulo = QLabel(
+            "Gestión de configuración"
+        )
+
+        subtitulo.setObjectName(
+            "subtituloLateral"
+        )
+
+        boton_inicio = QPushButton(
+            "Inicio"
+        )
+
+        boton_settings = QPushButton(
+            "Settings"
+        )
+
+        boton_archivo = QPushButton(
+            "Archivo"
+        )
+
+        boton_edicion = QPushButton(
+            "Edición"
+        )
+
+        boton_ver = QPushButton(
+            "Ver"
+        )
+
+        boton_inicio.clicked.connect(
+            self.mostrar_inicio
+        )
+
+        boton_settings.clicked.connect(
+            self.abrir_settings
+        )
+
+        boton_archivo.clicked.connect(
+            self.opcion_no_disponible
+        )
+
+        boton_edicion.clicked.connect(
+            self.opcion_no_disponible
+        )
+
+        boton_ver.clicked.connect(
+            self.opcion_no_disponible
+        )
+
+        layout.addWidget(
+            titulo
+        )
+
+        layout.addWidget(
+            subtitulo
+        )
+
+        layout.addSpacing(
+            25
+        )
+
+        layout.addWidget(
+            boton_inicio
+        )
+
+        layout.addWidget(
+            boton_settings
+        )
+
+        layout.addWidget(
+            boton_archivo
+        )
+
+        layout.addWidget(
+            boton_edicion
+        )
+
+        layout.addWidget(
+            boton_ver
+        )
+
+        layout.addStretch()
+
+        estado = QLabel(
+            "Sistema de configuración"
+        )
+
+        estado.setObjectName(
+            "estadoLateral"
+        )
+
+        layout.addWidget(
+            estado
+        )
+
+        barra.setLayout(
+            layout
+        )
+
+        return barra
+
+    def crear_panel_principal(self):
+        panel = QFrame()
+
+        panel.setObjectName(
+            "panelPrincipal"
+        )
+
+        layout = QVBoxLayout()
+
+        layout.setContentsMargins(
+            45,
+            35,
+            45,
+            35
+        )
+
+        layout.setSpacing(
+            20
+        )
+
+        encabezado = QHBoxLayout()
+
+        self.titulo_principal = QLabel(
+            "Bienvenido"
+        )
+
+        self.titulo_principal.setObjectName(
+            "tituloPrincipal"
+        )
+
+        self.estado = QLabel(
+            "Configuración cargada"
+        )
+
+        self.estado.setObjectName(
+            "estadoPrincipal"
+        )
+
+        encabezado.addWidget(
+            self.titulo_principal
+        )
+
+        encabezado.addStretch()
+
+        encabezado.addWidget(
+            self.estado
+        )
+
+        layout.addLayout(
+            encabezado
+        )
+
+        self.subtitulo_principal = QLabel(
+            "Administra las preferencias de tu aplicación."
+        )
+
+        self.subtitulo_principal.setObjectName(
+            "subtituloPrincipal"
+        )
+
+        layout.addWidget(
+            self.subtitulo_principal
+        )
+
+        tarjeta_usuario = QFrame()
+
+        tarjeta_usuario.setObjectName(
+            "tarjetaUsuario"
+        )
+
+        layout_usuario = QVBoxLayout()
+
+        layout_usuario.setContentsMargins(
+            30,
+            30,
+            30,
+            30
+        )
 
         self.foto_perfil = QLabel()
-        self.foto_perfil.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.foto_perfil.setFixedSize(
+            180,
+            180
+        )
+
+        self.foto_perfil.setAlignment(
+            Qt.AlignmentFlag.AlignCenter
+        )
+
+        self.foto_perfil.setObjectName(
+            "fotoPerfil"
+        )
+
+        self.nombre_usuario = QLabel(
+            "Usuario"
+        )
+
+        self.nombre_usuario.setAlignment(
+            Qt.AlignmentFlag.AlignCenter
+        )
+
+        self.nombre_usuario.setObjectName(
+            "nombreUsuario"
+        )
+
+        layout_usuario.addWidget(
+            self.foto_perfil,
+            alignment=Qt.AlignmentFlag.AlignCenter
+        )
+
+        layout_usuario.addWidget(
+            self.nombre_usuario
+        )
+
+        tarjeta_usuario.setLayout(
+            layout_usuario
+        )
+
+        layout.addWidget(
+            tarjeta_usuario
+        )
+
+        tarjeta_configuracion = QFrame()
+
+        tarjeta_configuracion.setObjectName(
+            "tarjetaConfiguracion"
+        )
+
+        layout_configuracion = QVBoxLayout()
+
+        titulo_configuracion = QLabel(
+            "Configuración actual"
+        )
+
+        titulo_configuracion.setObjectName(
+            "tituloTarjeta"
+        )
+
+        self.dato_tema = QLabel()
+        self.dato_idioma = QLabel()
+        self.dato_fuente = QLabel()
+
+        layout_configuracion.addWidget(
+            titulo_configuracion
+        )
+
+        layout_configuracion.addWidget(
+            self.dato_tema
+        )
+
+        layout_configuracion.addWidget(
+            self.dato_idioma
+        )
+
+        layout_configuracion.addWidget(
+            self.dato_fuente
+        )
+
+        tarjeta_configuracion.setLayout(
+            layout_configuracion
+        )
+
+        layout.addWidget(
+            tarjeta_configuracion
+        )
+
+        self.boton_editar = QPushButton(
+            "Editar configuración"
+        )
+
+        self.boton_editar.setObjectName(
+            "botonPrincipal"
+        )
+
+        self.boton_editar.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed
+        )
+
+        self.boton_editar.clicked.connect(
+            self.abrir_settings
+        )
+
+        layout.addWidget(
+            self.boton_editar
+        )
 
         layout.addStretch()
-        layout.addWidget(self.titulo)
-        layout.addWidget(self.subtitulo)
-        layout.addWidget(self.foto_perfil)
-        layout.addStretch()
 
-        widget_central.setLayout(layout)
+        panel.setLayout(
+            layout
+        )
 
-        self.setCentralWidget(widget_central)
-
-    def crear_menu(self):
-        barra_menu = QMenuBar()
-
-        menu_archivo = barra_menu.addMenu("Archivo")
-        menu_edicion = barra_menu.addMenu("Edición")
-        menu_ver = barra_menu.addMenu("Ver")
-        menu_settings = barra_menu.addMenu("Settings")
-
-        opcion_nuevo = QAction("Nuevo", self)
-        opcion_abrir = QAction("Abrir", self)
-        opcion_guardar = QAction("Guardar", self)
-        opcion_salir = QAction("Salir", self)
-
-        menu_archivo.addAction(opcion_nuevo)
-        menu_archivo.addAction(opcion_abrir)
-        menu_archivo.addAction(opcion_guardar)
-        menu_archivo.addSeparator()
-        menu_archivo.addAction(opcion_salir)
-
-        opcion_copiar = QAction("Copiar", self)
-        opcion_pegar = QAction("Pegar", self)
-
-        menu_edicion.addAction(opcion_copiar)
-        menu_edicion.addAction(opcion_pegar)
-
-        opcion_modo = QAction("Vista", self)
-        opcion_informacion = QAction("Información", self)
-
-        menu_ver.addAction(opcion_modo)
-        menu_ver.addAction(opcion_informacion)
-
-        opcion_configuracion = QAction("Configuración de usuario", self)
-        menu_settings.addAction(opcion_configuracion)
-
-        opcion_nuevo.triggered.connect(self.opcion_no_disponible)
-        opcion_abrir.triggered.connect(self.opcion_no_disponible)
-        opcion_guardar.triggered.connect(self.opcion_no_disponible)
-        opcion_copiar.triggered.connect(self.opcion_no_disponible)
-        opcion_pegar.triggered.connect(self.opcion_no_disponible)
-        opcion_modo.triggered.connect(self.opcion_no_disponible)
-        opcion_informacion.triggered.connect(self.opcion_no_disponible)
-
-        opcion_salir.triggered.connect(self.close)
-        opcion_configuracion.triggered.connect(self.abrir_settings)
-
-        self.setMenuBar(barra_menu)
+        return panel
 
     def aplicar_configuracion(self):
-        tema = self.configuracion["tema_interfaz"]
-        tamaño_fuente = self.configuracion["tamaño_fuente"]
-        color_menu = self.configuracion["color_barra_menu"]
-        color_letra = self.configuracion["color_letra"]
+        tema = self.configuracion[
+            "tema_interfaz"
+        ]
+
+        tamaño_fuente = self.configuracion[
+            "tamaño_fuente"
+        ]
+
+        color_menu = self.configuracion[
+            "color_barra_menu"
+        ]
+
+        color_letra = self.configuracion[
+            "color_letra"
+        ]
+
+        fuente = QFont(
+            "Segoe UI",
+            tamaño_fuente
+        )
+
+        self.setFont(
+            fuente
+        )
 
         if tema == "oscuro":
-            color_fondo = "#202124"
+            fondo = "#181A1F"
+            tarjeta = "#292D34"
+            texto_secundario = "#B8BCC5"
+            borde = "#383D46"
+            entrada = "#30343C"
         else:
-            color_fondo = "#FFFFFF"
+            fondo = "#F4F6F8"
+            tarjeta = "#FFFFFF"
+            texto_secundario = "#626975"
+            borde = "#DDE1E6"
+            entrada = "#F7F8FA"
 
         self.setStyleSheet(
             f"""
             QMainWindow {{
-                background-color: {color_fondo};
+                background-color: {fondo};
             }}
 
-            QLabel {{
-                color: {color_letra};
-                font-size: {tamaño_fuente}px;
+            QWidget {{
+                font-family: 'Segoe UI';
             }}
 
-            QMenuBar {{
+            #barraLateral {{
                 background-color: {color_menu};
-                color: {color_letra};
-                font-size: {tamaño_fuente}px;
             }}
 
-            QMenuBar::item {{
-                background-color: transparent;
-                padding: 5px 10px;
+            #tituloLateral {{
+                color: {color_letra};
+                font-size: 24px;
+                font-weight: bold;
             }}
 
-            QMenu {{
-                background-color: {color_fondo};
+            #subtituloLateral {{
                 color: {color_letra};
-                font-size: {tamaño_fuente}px;
+                font-size: 11px;
+            }}
+
+            #estadoLateral {{
+                color: {color_letra};
+                font-size: 11px;
+            }}
+
+            #panelPrincipal {{
+                background-color: {fondo};
+            }}
+
+            #tituloPrincipal {{
+                color: {color_letra};
+                font-size: 28px;
+                font-weight: bold;
+            }}
+
+            #subtituloPrincipal {{
+                color: {texto_secundario};
+                font-size: 14px;
+            }}
+
+            #estadoPrincipal {{
+                color: {color_letra};
+                background-color: {entrada};
+                border: 1px solid {borde};
+                border-radius: 10px;
+                padding: 8px 14px;
+            }}
+
+            #tarjetaUsuario,
+            #tarjetaConfiguracion {{
+                background-color: {tarjeta};
+                border: 1px solid {borde};
+                border-radius: 16px;
+            }}
+
+            #fotoPerfil {{
+                background-color: {entrada};
+                border: 3px solid {borde};
+                border-radius: 90px;
+            }}
+
+            #nombreUsuario {{
+                color: {color_letra};
+                font-size: 22px;
+                font-weight: bold;
+                padding-top: 10px;
+            }}
+
+            #tituloTarjeta {{
+                color: {color_letra};
+                font-size: 18px;
+                font-weight: bold;
+            }}
+
+            #tarjetaConfiguracion QLabel {{
+                color: {texto_secundario};
+                font-size: 14px;
+                padding: 3px;
             }}
 
             QPushButton {{
+                background-color: {entrada};
+                color: {color_letra};
+                border: 1px solid {borde};
+                border-radius: 8px;
+                padding: 10px;
                 font-size: {tamaño_fuente}px;
+                text-align: left;
+            }}
+
+            QPushButton:hover {{
+                border: 1px solid {color_letra};
+            }}
+
+            #botonPrincipal {{
+                background-color: {color_menu};
+                color: {color_letra};
+                border: none;
+                border-radius: 10px;
+                padding: 14px;
+                text-align: center;
+                font-weight: bold;
+            }}
+
+            #botonPrincipal:hover {{
+                background-color: {entrada};
             }}
             """
         )
+
+    def actualizar_datos_usuario(self):
+        nombre = self.configuracion[
+            "nombre_usuario"
+        ]
+
+        tema = self.configuracion[
+            "tema_interfaz"
+        ]
+
+        idioma = self.configuracion[
+            "idioma"
+        ]
+
+        tamaño = self.configuracion[
+            "tamaño_fuente"
+        ]
+
+        self.titulo_principal.setText(
+            f"Bienvenido, {nombre}"
+        )
+
+        self.nombre_usuario.setText(
+            nombre
+        )
+
+        self.dato_tema.setText(
+            f"Tema: {tema}"
+        )
+
+        self.dato_idioma.setText(
+            f"Idioma: {idioma}"
+        )
+
+        self.dato_fuente.setText(
+            f"Tamaño de fuente: {tamaño}px"
+        )
+
+        self.aplicar_foto_perfil()
+
+    def crear_foto_circular(self, ruta):
+        imagen_original = QPixmap(
+            ruta
+        )
+
+        if imagen_original.isNull():
+            return QPixmap()
+
+        tamaño = min(
+            imagen_original.width(),
+            imagen_original.height()
+        )
+
+        x = (
+            imagen_original.width() - tamaño
+        ) // 2
+
+        y = (
+            imagen_original.height() - tamaño
+        ) // 2
+
+        imagen = imagen_original.copy(
+            x,
+            y,
+            tamaño,
+            tamaño
+        )
+
+        imagen = imagen.scaled(
+            160,
+            160,
+            Qt.AspectRatioMode.IgnoreAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+        resultado = QPixmap(
+            160,
+            160
+        )
+
+        resultado.fill(
+            Qt.GlobalColor.transparent
+        )
+
+        pintor = QPainter(
+            resultado
+        )
+
+        pintor.setRenderHint(
+            QPainter.RenderHint.Antialiasing
+        )
+
+        ruta_circular = QPainterPath()
+
+        ruta_circular.addEllipse(
+            0,
+            0,
+            160,
+            160
+        )
+
+        pintor.setClipPath(
+            ruta_circular
+        )
+
+        pintor.drawPixmap(
+            0,
+            0,
+            imagen
+        )
+
+        pintor.end()
+
+        return resultado
+
+    def aplicar_foto_perfil(self):
+        ruta_foto = self.configuracion[
+            "foto_perfil"
+        ]
+
+        if ruta_foto and os.path.exists(
+            ruta_foto
+        ):
+            imagen = self.crear_foto_circular(
+                ruta_foto
+            )
+
+            if not imagen.isNull():
+                self.foto_perfil.setPixmap(
+                    imagen
+                )
+
+                return
+
+        self.foto_perfil.clear()
+
+        self.foto_perfil.setText(
+            "Sin foto"
+        )
+
+    def mostrar_inicio(self):
+        self.actualizar_datos_usuario()
 
     def opcion_no_disponible(self):
         QMessageBox.information(
@@ -158,39 +707,33 @@ class MainWindow(QMainWindow):
         )
 
         if ventana_settings.exec():
-            self.configuracion = ventana_settings.configuracion
+            self.configuracion = (
+                ventana_settings.configuracion
+            )
 
-            if guardar_configuracion(self.configuracion):
+            if guardar_configuracion(
+                self.configuracion
+            ):
                 self.aplicar_configuracion()
-                self.aplicar_foto_perfil()
+                self.actualizar_datos_usuario()
+
+                self.estado.setText(
+                    "Configuración guardada"
+                )
 
                 QMessageBox.information(
                     self,
                     "Configuración",
                     "La configuración se guardó correctamente."
                 )
+
             else:
+                self.estado.setText(
+                    "Error al guardar"
+                )
+
                 QMessageBox.critical(
                     self,
                     "Error",
                     "No fue posible guardar la configuración."
                 )
-
-    def aplicar_foto_perfil(self):
-        ruta_foto = self.configuracion["foto_perfil"]
-
-        if ruta_foto and os.path.exists(ruta_foto):
-            imagen = QPixmap(ruta_foto)
-
-            if not imagen.isNull():
-                imagen = imagen.scaled(
-                    150,
-                    150,
-                    Qt.AspectRatioMode.KeepAspectRatio,
-                    Qt.TransformationMode.SmoothTransformation
-                )
-
-                self.foto_perfil.setPixmap(imagen)
-                return
-
-        self.foto_perfil.setText("Sin foto de perfil")
